@@ -15,3 +15,8 @@ ios/Runner/GoogleService-Info.plist
 .vscode/
 .idea/
 *.iml
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+android/**/google-services.json
