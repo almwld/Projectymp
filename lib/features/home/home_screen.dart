@@ -1,97 +1,44 @@
-import "../../core/cart_provider.dart";
-import "package:provider/provider.dart";
-import "../cart/cart_screen.dart";
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'widgets/yemen_stories_bar.dart';
-import 'widgets/recommendation_section.dart';
+import 'widgets/product_card.dart';
+import 'widgets/floating_nav.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  void _addNewStory(BuildContext context) {
-    TextEditingController controller = TextEditingController();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, top: 20, left: 20, right: 20),
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('إضافة عرض جديد للسوق 🇾🇪', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 15),
-              TextField(
-                controller: controller,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: 'مثلاً: عسل سدر دوعني فاخر',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF007A33), padding: const EdgeInsets.all(15)),
-                  onPressed: () async {
-                    if (controller.text.isNotEmpty) {
-                      await FirebaseFirestore.instance.collection('stories').add({
-                        'title': controller.text,
-                        'image': 'https://bit.ly/yemen-market-icon',
-                        'timestamp': FieldValue.serverTimestamp(),
-                      });
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: const Text('نشر الآن', style: TextStyle(color: Colors.white)),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF9F9F9),
-        appBar: AppBar(
-          title: const Text('يمن ماركت فليكس', style: TextStyle(fontWeight: FontWeight.bold)),
-          centerTitle: true,
-          backgroundColor: const Color(0xFF007A33),
-          foregroundColor: Colors.white,
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const YemenStoriesBar(),
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text("توصيات ذكية لك", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FB),
+      body: Stack(
+        children: [
+          CustomScrollView(slivers: [
+            SliverAppBar(
+              expandedHeight: 160, pinned: true, elevation: 0,
+              backgroundColor: const Color(0xFF1A237E),
+              flexibleSpace: FlexibleSpaceBar(
+                background: Container(decoration: const BoxDecoration(gradient: LinearGradient(colors: [Color(0xFF1A237E), Color(0xFF0D1440)]))),
+                title: const Text("يمن ماركت فليكس", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
-              const RecommendationSection(),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => _addNewStory(context),
-          backgroundColor: const Color(0xFF007A33),
-          label: const Text('إضافة عرض', style: TextStyle(color: Colors.white)),
-          icon: const Icon(Icons.add_shopping_cart, color: Colors.white),
-        ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: Row(children: [
+                  _bento("عسل سدر", Icons.hive, Colors.orange),
+                  const SizedBox(width: 10),
+                  _bento("بن خولاني", Icons.coffee, Colors.brown),
+                ]),
+              ),
+            ),
+            SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 0.8),
+              delegate: SliverChildBuilderDelegate((c, i) => const PremiumProductCard(title: "منتج ملكي", price: "40,000 ر.ي", imageUrl: "https://picsum.photos/300"), childCount: 4),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 120)),
+          ]),
+          const Align(alignment: Alignment.bottomCenter, child: FloatingGlassNav()),
+        ],
       ),
     );
   }
+  Widget _bento(String t, IconData i, Color c) => Expanded(child: Container(height: 70, decoration: BoxDecoration(color: c.withOpacity(0.1), borderRadius: BorderRadius.circular(15), border: Border.all(color: c.withOpacity(0.2))), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(i, color: c, size: 20), const SizedBox(width: 8), Text(t, style: TextStyle(color: c, fontWeight: FontWeight.bold, fontSize: 13))])));
 }
